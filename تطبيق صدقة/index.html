@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="description" content="تطبيق صدقة جارية - اهدِ ثواب تلاوة القرآن لمن تحب" />
+  <title>صدقة جارية</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Amiri:wght@400;700&family=Cairo:wght@300;400;600;700;800&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body>
+
+  <!-- ===== SPLASH SCREEN ===== -->
+  <div id="splash-screen" class="splash-screen">
+    <div class="splash-content">
+      <div class="splash-logo">
+        <i class="fas fa-mosque"></i>
+      </div>
+      <h1 class="splash-title">صدقة جارية</h1>
+      <p class="splash-subtitle">اهدِ ثواب القرآن لمن تحب</p>
+      <div class="splash-loader">
+        <div class="loader-bar"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SETUP SCREEN (First Time) ===== -->
+  <div id="setup-screen" class="screen" style="display:none;">
+    <div class="setup-container">
+      <div class="setup-header">
+        <div class="setup-icon"><i class="fas fa-heart"></i></div>
+        <h2>أهدِ ثواب قراءتك</h2>
+        <p>أضف اسم من تريد إهداء ثواب القران الكريم له</p>
+      </div>
+      <div id="persons-list" class="persons-list"></div>
+      <button class="btn-add-person" id="btn-add-first-person">
+        <i class="fas fa-plus"></i> إضافة شخص
+      </button>
+      <button class="btn-primary btn-start" id="btn-start-app" style="display:none;">
+        <i class="fas fa-arrow-left"></i> ابدأ رحلتك
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== ADD/EDIT PERSON MODAL ===== -->
+  <div id="person-modal" class="modal" style="display:none;">
+    <div class="modal-overlay" onclick="closePersonModal()"></div>
+    <div class="modal-content person-modal-content">
+      <div class="modal-header">
+        <h3 id="person-modal-title">إضافة شخص</h3>
+        <button class="modal-close" onclick="closePersonModal()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="avatar-upload">
+          <div class="avatar-preview" id="avatar-preview">
+            <i class="fas fa-user"></i>
+          </div>
+          <button class="btn-upload" onclick="document.getElementById('avatar-input').click()">
+            <i class="fas fa-camera"></i> اختر صورة
+          </button>
+          <input type="file" id="avatar-input" accept="image/*" style="display:none;"
+            onchange="handleAvatarUpload(event)" />
+        </div>
+        <div class="form-group">
+          <label>الاسم</label>
+          <input type="text" id="person-name" placeholder="أدخل الاسم" class="form-input" />
+        </div>
+        <div class="form-group">
+          <label>صلة القرابة</label>
+          <div class="relation-grid">
+            <button class="relation-btn" data-value="أب" onclick="selectRelation(this)">أب</button>
+            <button class="relation-btn" data-value="أم" onclick="selectRelation(this)">أم</button>
+            <button class="relation-btn" data-value="أخ" onclick="selectRelation(this)">أخ</button>
+            <button class="relation-btn" data-value="أخت" onclick="selectRelation(this)">أخت</button>
+            <button class="relation-btn" data-value="عم" onclick="selectRelation(this)">عم</button>
+            <button class="relation-btn" data-value="عمة" onclick="selectRelation(this)">عمة</button>
+            <button class="relation-btn" data-value="خال" onclick="selectRelation(this)">خال</button>
+            <button class="relation-btn" data-value="خالة" onclick="selectRelation(this)">خالة</button>
+            <button class="relation-btn" data-value="جد" onclick="selectRelation(this)">جد</button>
+            <button class="relation-btn" data-value="جدة" onclick="selectRelation(this)">جدة</button>
+            <button class="relation-btn" data-value="صديق" onclick="selectRelation(this)">صديق</button>
+            <button class="relation-btn" data-value="صديقة" onclick="selectRelation(this)">صديقة</button>
+            <button class="relation-btn" data-value="زوج" onclick="selectRelation(this)">زوج</button>
+            <button class="relation-btn" data-value="زوجة" onclick="selectRelation(this)">زوجة</button>
+            <button class="relation-btn" data-value="ابن" onclick="selectRelation(this)">ابن</button>
+            <button class="relation-btn" data-value="ابنة" onclick="selectRelation(this)">ابنة</button>
+            <button class="relation-btn wide" data-value="أخرى" onclick="selectRelation(this)">أخرى</button>
+          </div>
+          <input type="text" id="person-relation-custom" placeholder="أو اكتب صلة القرابة هنا" class="form-input"
+            style="margin-top:8px;" />
+        </div>
+        <div class="form-group">
+          <label>الحالة</label>
+          <div class="status-grid">
+            <button class="status-btn" data-value="متوفى" onclick="selectStatus(this)">
+              <i class="fas fa-moon"></i> متوفى
+            </button>
+            <button class="status-btn" data-value="مريض" onclick="selectStatus(this)">
+              <i class="fas fa-heart-pulse"></i> مريض
+            </button>
+            <button class="status-btn" data-value="على قيد الحياة" onclick="selectStatus(this)">
+              <i class="fas fa-sun"></i> على قيد الحياة
+            </button>
+          </div>
+        </div>
+        <button class="btn-primary btn-save-person" onclick="savePerson()">
+          <i class="fas fa-save"></i> حفظ
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== DEDICATION SCREEN (Home) ===== -->
+  <div id="dedication-screen" class="screen" style="display:none;">
+    <div class="dedication-bg"></div>
+
+    <!-- Kaaba background overlay -->
+    <div
+      style="position:fixed;inset:0;background:url('img001/Kaaba masjid Al haram.jfif') center/cover;opacity:0.07;pointer-events:none;z-index:0;">
+    </div>
+
+    <div class="dedication-container">
+      <!-- App Logo -->
+      <div style="text-align:center;padding-top:20px;">
+        <div class="splash-logo" style="margin:0 auto 12px;width:70px;height:70px;font-size:2rem;">
+          <i class="fas fa-mosque"></i>
+        </div>
+        <h1 style="font-size:1.5rem;font-weight:800;color:var(--accent);margin-bottom:4px;">صدقة جارية</h1>
+        <p style="font-size:.85rem;color:var(--text-dim);">اهدِ ثواب القرآن لمن تحب</p>
+      </div>
+
+      <div class="dedication-header" style="margin-top:16px;">
+        <h2 class="dedication-title">بسم الله الرحمن الرحيم</h2>
+        <p class="dedication-subtitle">هذا التطبيق صدقة جارية</p>
+      </div>
+
+      <div class="dedication-cards-wrapper">
+        <div id="dedication-persons-row" class="dedication-persons-row"></div>
+      </div>
+
+      <div class="dedication-verse">
+        <p class="verse-text">﴿ إِنَّا نَحْنُ نُحْيِي الْمَوْتَىٰ وَنَكْتُبُ مَا قَدَّمُوا وَآثَارَهُمْ ﴾</p>
+        <p class="verse-ref">سورة يس - الآية 12</p>
+      </div>
+
+      <div class="hasanat-card">
+        <div class="hasanat-icon"><i class="fas fa-star"></i></div>
+        <div class="hasanat-info">
+          <div class="hasanat-number" id="total-hasanat">0</div>
+          <div class="hasanat-label">حسنة مُهداة</div>
+        </div>
+        <div class="hasanat-detail">
+          <span id="total-letters">0</span> حرف
+        </div>
+      </div>
+
+      <div class="quick-actions">
+        <button class="btn-edit-persons" onclick="openDedicationEditor()">
+          <i class="fas fa-edit"></i> تعديل الإهداء
+        </button>
+        <button class="btn-enter-app" onclick="goToMainApp()">
+          <i class="fas fa-quran"></i> ادخل إلى التطبيق
+        </button>
+      </div>
+
+      <!-- Developer Card -->
+      <div class="dev-card" onclick="this.classList.toggle('expanded')" style="margin-top:24px;">
+        <div class="dev-card-header">
+          <div class="dev-avatar">
+            <img src="dev/DEVOLPES.jpeg" alt="المطور"
+              onerror="this.parentElement.innerHTML='<i class=&quot;fas fa-code&quot;></i>'" />
+          </div>
+          <div class="dev-info">
+            <div class="dev-name">طارق أحمد الشيخ منصور</div>
+            <div class="dev-title">مطوّر التطبيق</div>
+          </div>
+          <i class="fas fa-chevron-down dev-toggle"></i>
+        </div>
+        <div class="dev-links">
+          <a href="https://wa.me/0900868813" class="dev-link whatsapp" target="_blank">
+            <i class="fab fa-whatsapp"></i> واتساب
+          </a>
+          <a href="https://facebook.com" class="dev-link facebook" target="_blank">
+            <i class="fab fa-facebook"></i> فيسبوك
+          </a>
+          <a href="https://github.com" class="dev-link github" target="_blank">
+            <i class="fab fa-github"></i> GitHub
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===== MAIN APP ===== -->
+  <div id="main-app" class="screen" style="display:none;">
+    <!-- Top Bar -->
+    <div class="top-bar">
+      <div class="top-bar-right" style="display:flex; gap:12px; align-items:center;">
+        <button class="btn-icon" style="width:34px;height:34px;font-size:1rem;" onclick="toggleTheme()"
+          id="btn-theme-toggle">
+          <i class="fas fa-sun"></i>
+        </button>
+        <div class="mini-dedication" onclick="goToScreen('dedication-screen')" id="mini-dedication">
+          <div class="mini-avatars"></div>
+        </div>
+      </div>
+      <div class="top-bar-center">
+        <span class="app-name">صدقة جارية</span>
+      </div>
+      <div class="top-bar-left">
+        <div class="hasanat-badge" onclick="showAchievements()">
+          <i class="fas fa-star"></i>
+          <span id="top-hasanat">0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-content" id="main-content">
+
+      <!-- ===== TAB: QURAN READER ===== -->
+      <div id="tab-quran" class="tab-content active">
+        <div class="quran-header">
+          <div class="quran-search-bar">
+            <input type="text" id="quran-search" placeholder="ابحث عن سورة أو آية..." onInput="handleQuranSearch()" />
+            <i class="fas fa-search"></i>
+          </div>
+          <div class="quran-search-results" id="quran-search-results" style="display:none;"></div>
+        </div>
+
+        <!-- Quran Index View -->
+        <div id="quran-index-view">
+          <div class="index-tabs">
+            <button class="index-tab active" onclick="switchIndexTab('surahs', this)">السور</button>
+            <button class="index-tab" onclick="switchIndexTab('ajza', this)">الأجزاء</button>
+            <button class="index-tab" onclick="switchIndexTab('ahzab', this)">الأحزاب</button>
+          </div>
+          <div id="surahs-list" class="surahs-list"></div>
+          <div id="ajza-list" class="ajza-list" style="display:none;"></div>
+          <div id="ahzab-list" class="ahzab-list" style="display:none;"></div>
+        </div>
+
+        <!-- Quran Reader View -->
+        <div id="quran-reader-view" style="display:none;">
+          <div class="reader-header">
+            <button class="btn-back" onclick="closeQuranReader()"><i class="fas fa-arrow-right"></i></button>
+            <div class="reader-surah-info">
+              <h3 id="reader-surah-name"></h3>
+              <span id="reader-surah-details"></span>
+            </div>
+            <div class="reader-controls">
+              <button class="btn-icon" onclick="openSurahNavigator()"><i class="fas fa-list"></i></button>
+              <button class="btn-icon" id="btn-reader-font-size" onclick="changeFontSize()"><i
+                  class="fas fa-text-height"></i></button>
+            </div>
+          </div>
+          <div class="mushaf-container" id="mushaf-container">
+            <div class="mushaf-border">
+              <div class="mushaf-inner">
+                <div class="bismillah-header" id="bismillah-header">
+                  <div class="surah-ornament">🌙</div>
+                  <div class="surah-name-header" id="surah-name-header"></div>
+                  <div class="bismillah-text" id="bismillah-text">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
+                </div>
+                <div id="ayah-text-container" class="ayah-text-container"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== TAB: LISTEN ===== -->
+      <div id="tab-listen" class="tab-content">
+        <!-- Listen sub-tabs -->
+        <div class="listen-subtabs">
+          <button class="listen-subtab active" onclick="switchListenTab('reciters', this)">
+            <i class="fas fa-microphone"></i> القراء
+          </button>
+          <button class="listen-subtab" onclick="switchListenTab('radio', this)">
+            <i class="fas fa-radio"></i> الإذاعات
+          </button>
+          <button class="listen-subtab" onclick="switchListenTab('live', this)">
+            <i class="fas fa-tv"></i> البث المباشر
+          </button>
+        </div>
+
+        <!-- Reciters Panel -->
+        <div id="panel-reciters" class="listen-panel active">
+          <div class="reciters-search">
+            <input type="text" id="reciters-search" placeholder="ابحث عن قارئ..." onInput="filterReciters()" />
+            <i class="fas fa-search"></i>
+          </div>
+          <div class="featured-reciters">
+            <h4>القراء المميزون</h4>
+            <div class="featured-reciters-grid" id="featured-reciters-grid"></div>
+          </div>
+          <div id="all-reciters-list" class="all-reciters-list">
+            <h4>جميع القراء</h4>
+            <div id="reciters-grid"></div>
+          </div>
+        </div>
+
+        <!-- Radio Panel -->
+        <div id="panel-radio" class="listen-panel">
+          <div class="radio-search">
+            <input type="text" id="radio-search" placeholder="ابحث عن إذاعة..." onInput="filterRadios()" />
+            <i class="fas fa-search"></i>
+          </div>
+          <div id="radios-grid" class="radios-grid"></div>
+        </div>
+
+        <!-- Live Panel -->
+        <div id="panel-live" class="listen-panel">
+          <div class="live-channels">
+            <div class="live-channel-card" onclick="playLiveChannel('quran')">
+              <div class="live-badge"><i class="fas fa-circle"></i> مباشر</div>
+              <div class="channel-icon kaaba-icon"><i class="fas fa-mosque"></i></div>
+              <h4>قناة القرآن الكريم</h4>
+              <p>البث المباشر من المملكة</p>
+              <button class="btn-play-live"><i class="fas fa-play"></i> مشاهدة</button>
+            </div>
+            <div class="live-channel-card" onclick="playLiveChannel('sunnah')">
+              <div class="live-badge"><i class="fas fa-circle"></i> مباشر</div>
+              <div class="channel-icon hadith-icon"><i class="fas fa-book-open"></i></div>
+              <h4>قناة الحديث الشريف</h4>
+              <p>بث مستمر للسنة النبوية</p>
+              <button class="btn-play-live"><i class="fas fa-play"></i> مشاهدة</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== TAB: PRAYER TIMES ===== -->
+      <div id="tab-prayer" class="tab-content">
+        <div class="prayer-header">
+          <div class="prayer-location" id="prayer-location">
+            <i class="fas fa-location-dot"></i>
+            <span id="prayer-city-name">جارٍ تحديد الموقع...</span>
+          </div>
+          <div class="hijri-date" id="hijri-date"></div>
+          <div class="gregorian-date" id="gregorian-date"></div>
+        </div>
+
+        <div class="next-prayer-card" id="next-prayer-card">
+          <div class="next-prayer-label">الصلاة القادمة</div>
+          <div class="next-prayer-name" id="next-prayer-name">--</div>
+          <div class="next-prayer-countdown" id="prayer-countdown">--:--:--</div>
+        </div>
+
+        <div class="prayers-grid" id="prayers-grid"></div>
+
+        <div class="qibla-section">
+          <h4><i class="fas fa-compass"></i> اتجاه القبلة</h4>
+          <div class="qibla-compass" id="qibla-compass">
+            <div class="compass-needle" id="compass-needle">
+              <i class="fas fa-location-arrow"></i>
+            </div>
+            <div class="compass-kaaba-icon"><i class="fas fa-mosque"></i></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== TAB: AZKAR ===== -->
+      <div id="tab-azkar" class="tab-content">
+        <div class="azkar-categories">
+          <button class="azkar-cat-btn active" onclick="loadAzkar('morning', this)">
+            <i class="fas fa-sun"></i> أذكار الصباح
+          </button>
+          <button class="azkar-cat-btn" onclick="loadAzkar('evening', this)">
+            <i class="fas fa-moon"></i> أذكار المساء
+          </button>
+          <button class="azkar-cat-btn" onclick="loadAzkar('sleep', this)">
+            <i class="fas fa-bed"></i> أذكار النوم
+          </button>
+          <button class="azkar-cat-btn" onclick="loadAzkar('prayer', this)">
+            <i class="fas fa-praying-hands"></i> أذكار الصلاة
+          </button>
+          <button class="azkar-cat-btn" onclick="loadAzkar('quran', this)">
+            <i class="fas fa-star"></i> أدعية قرآنية
+          </button>
+        </div>
+        <div id="azkar-container" class="azkar-container"></div>
+      </div>
+
+      <!-- ===== TAB: HADITH ===== -->
+      <div id="tab-hadith" class="tab-content">
+        <div class="hadith-tabs">
+          <button class="hadith-tab active" onclick="switchHadithTab('riyad', this)">رياض الصالحين</button>
+          <button class="hadith-tab" onclick="switchHadithTab('tafsir', this)">التفسير</button>
+        </div>
+        <div id="hadith-riyad-panel" class="hadith-panel active">
+          <div class="hadith-card-container" id="hadith-daily"></div>
+        </div>
+        <div id="hadith-tafsir-panel" class="hadith-panel">
+          <div class="tafsir-selector">
+            <select id="tafsir-book-select" onchange="loadTafsirBook()" class="form-select">
+              <option value="">اختر كتاب التفسير...</option>
+            </select>
+            <select id="tafsir-surah-select" onchange="loadTafsirSurah()" class="form-select" disabled>
+              <option value="">اختر السورة...</option>
+            </select>
+          </div>
+          <div id="tafsir-content" class="tafsir-content"></div>
+        </div>
+      </div>
+
+      <!-- ===== TAB: PROGRESS ===== -->
+      <div id="tab-progress" class="tab-content">
+        <div class="progress-header">
+          <h3>رحلة ختمتك</h3>
+          <p>تتبع قراءتك واستماعك</p>
+        </div>
+
+        <div class="khatmah-card">
+          <div class="khatmah-progress-circle">
+            <svg viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="45" class="progress-bg" />
+              <circle cx="50" cy="50" r="45" class="progress-fill" id="khatmah-circle" stroke-dasharray="0 283" />
+            </svg>
+            <div class="khatmah-percent" id="khatmah-percent">0%</div>
+          </div>
+          <div class="khatmah-info">
+            <div class="khatmah-stat"><span id="surahs-read">0</span><small>سورة</small></div>
+            <div class="khatmah-stat"><span id="ayahs-read">0</span><small>آية</small></div>
+          </div>
+        </div>
+
+        <div class="last-position-card" id="last-position-card" style="display:none;">
+          <div class="last-pos-icon"><i class="fas fa-bookmark"></i></div>
+          <div class="last-pos-info">
+            <h4>توقفت عند</h4>
+            <p id="last-position-text"></p>
+          </div>
+          <button class="btn-continue" onclick="continueReading()">تابع</button>
+        </div>
+
+        <div class="read-surahs-section">
+          <h4>السور المقروءة / المسموعة</h4>
+          <div id="read-surahs-grid" class="read-surahs-grid"></div>
+        </div>
+
+        <div class="achievements-section">
+          <h4>الأوسمة</h4>
+          <div id="badges-grid" class="badges-grid"></div>
+        </div>
+
+        <div class="stats-section">
+          <h4>إحصائياتك</h4>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <i class="fas fa-star"></i>
+              <div class="stat-number" id="stat-hasanat">0</div>
+              <div class="stat-label">حسنة</div>
+            </div>
+            <div class="stat-card">
+              <i class="fas fa-font"></i>
+              <div class="stat-number" id="stat-letters">0</div>
+              <div class="stat-label">حرف مقروء</div>
+            </div>
+            <div class="stat-card">
+              <i class="fas fa-headphones"></i>
+              <div class="stat-number" id="stat-listened">0</div>
+              <div class="stat-label">آية مسموعة</div>
+            </div>
+            <div class="stat-card">
+              <i class="fas fa-fire"></i>
+              <div class="stat-number" id="stat-streak">0</div>
+              <div class="stat-label">أيام متتالية</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /main-content -->
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+      <button class="nav-btn active" onclick="switchTab('quran', this)" id="nav-quran">
+        <i class="fas fa-quran"></i>
+        <span>المصحف</span>
+      </button>
+      <button class="nav-btn" onclick="switchTab('listen', this)" id="nav-listen">
+        <i class="fas fa-headphones"></i>
+        <span>استماع</span>
+      </button>
+      <button class="nav-btn" onclick="switchTab('prayer', this)" id="nav-prayer">
+        <i class="fas fa-mosque"></i>
+        <span>الصلاة</span>
+      </button>
+      <button class="nav-btn" onclick="switchTab('azkar', this)" id="nav-azkar">
+        <i class="fas fa-hands-praying"></i>
+        <span>الأذكار</span>
+      </button>
+      <button class="nav-btn" onclick="switchTab('hadith', this)" id="nav-hadith">
+        <i class="fas fa-book-open"></i>
+        <span>المكتبة</span>
+      </button>
+      <button class="nav-btn" onclick="switchTab('progress', this)" id="nav-progress">
+        <i class="fas fa-chart-line"></i>
+        <span>التقدم</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- ===== AUDIO PLAYER ===== -->
+  <div id="audio-player" class="audio-player" style="display:none;">
+    <div class="player-body">
+      <div class="player-info">
+        <div class="player-thumbnail" id="player-thumbnail">
+          <i class="fas fa-headphones"></i>
+        </div>
+        <div class="player-text" onclick="openFullPlayer()">
+          <div class="player-surah" id="player-surah-name">--</div>
+          <div class="player-reciter" id="player-reciter-name">--</div>
+        </div>
+        <button class="btn-player-expand" onclick="closeAudioPlayerEntirely()"
+          style="color: var(--text-dim); margin-left: 8px;"><i class="fas fa-times"></i></button>
+        <button class="btn-player-expand" onclick="openFullPlayer()"><i class="fas fa-chevron-up"></i></button>
+      </div>
+      <div class="player-controls-mini">
+        <button class="btn-icon" onclick="playerPrev()"><i class="fas fa-backward-step"></i></button>
+        <button class="btn-play-pause" id="btn-play-pause-mini" onclick="togglePlay()">
+          <i class="fas fa-play"></i>
+        </button>
+        <button class="btn-icon" onclick="playerNext()"><i class="fas fa-forward-step"></i></button>
+      </div>
+      <div class="player-progress-mini">
+        <div class="progress-bar-mini">
+          <div class="progress-fill-mini" id="progress-fill-mini"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== FULL PLAYER MODAL ===== -->
+  <div id="full-player-modal" class="full-player-modal" style="display:none;">
+
+    <!-- Design A: Apple Music (Sync reciters: Al-Zain & AlQuran.cloud) -->
+    <div id="fp-design-a" class="fp-design-a">
+      <div class="fp-a-bg" id="fp-a-bg"></div>
+      <div class="fp-a-blur"></div>
+      <div class="fp-a-topbar">
+        <button class="fp-a-btn-round" onclick="closeFullPlayer()"><i class="fas fa-chevron-down"></i></button>
+        <span class="fp-a-now-playing">NOW PLAYING</span>
+        <button class="fp-a-btn-round" onclick="downloadCurrentSurah()"><i class="fas fa-ellipsis"></i></button>
+      </div>
+      <div class="fp-a-artwork">
+        <div class="fp-a-art-inner" id="fp-a-art-inner"></div>
+        <div class="fp-a-ayah-overlay">
+          <div class="fp-a-ayah-text" id="fp-a-ayah-text"></div>
+          <div class="fp-a-ayah-sub" id="fp-a-ayah-sub"></div>
+        </div>
+      </div>
+      <div class="fp-a-info">
+        <div class="fp-a-surah" id="fp-surah-name">--</div>
+        <div class="fp-a-reciter" id="fp-reciter-name">--</div>
+      </div>
+      <div class="fp-a-progress">
+        <input type="range" id="fp-seekbar" class="fp-a-seekbar" value="0" min="0" max="100"
+          oninput="seekAudio(this.value)" />
+        <div class="fp-a-times"><span id="fp-current-time">0:00</span><span id="fp-total-time">0:00</span></div>
+      </div>
+      <div class="fp-a-controls">
+        <button class="fp-a-ctrl-btn" onclick="toggleRepeat()" id="btn-repeat"><i class="fas fa-repeat"></i></button>
+        <button class="fp-a-ctrl-btn" onclick="playerPrev()"><i class="fas fa-backward-step"></i></button>
+        <button class="fp-a-play-btn" onclick="togglePlay()" id="fp-play-btn"><i class="fas fa-play"></i></button>
+        <button class="fp-a-ctrl-btn" onclick="playerNext()"><i class="fas fa-forward-step"></i></button>
+        <button class="fp-a-ctrl-btn" onclick="downloadCurrentSurah()"><i class="fas fa-download"></i></button>
+      </div>
+    </div>
+
+    <!-- Design B: Islamic Green (Manual reciters: Noreen, Fatih) -->
+    <div id="fp-design-b" class="fp-design-b" style="display:none;">
+      <div class="fp-b-header">
+        <div class="fp-b-kaaba" id="fp-b-kaaba"></div>
+        <div class="fp-b-kaaba-overlay"></div>
+        <div class="fp-b-topbar">
+          <button class="fp-b-btn-round" onclick="closeFullPlayer()"><i class="fas fa-chevron-down"></i></button>
+          <span class="fp-b-label">NOW PLAYING</span>
+          <button class="fp-b-btn-round" onclick="downloadCurrentSurah()"><i class="fas fa-download"></i></button>
+        </div>
+        <div class="fp-b-info">
+          <h2 class="fp-b-surah" id="fp-b-surah-name">--</h2>
+          <p class="fp-b-reciter" id="fp-b-reciter-name">--</p>
+        </div>
+        <div class="fp-b-waveform">
+          <div class="wv-bars" id="wv-bars"></div>
+        </div>
+        <div class="fp-b-progress">
+          <div class="fp-b-times"><span id="fp-b-current-time">0:00</span><span id="fp-b-total-time">0:00</span></div>
+          <input type="range" id="fp-b-seekbar" class="fp-b-seekbar" value="0" min="0" max="100"
+            oninput="seekAudio(this.value)" />
+        </div>
+        <div class="fp-b-controls">
+          <button class="fp-b-ctrl-btn" onclick="toggleRepeat()" id="btn-repeat-b"><i
+              class="fas fa-shuffle"></i></button>
+          <button class="fp-b-ctrl-btn" onclick="playerNext()"><i class="fas fa-forward-step"></i></button>
+          <button class="fp-b-play-btn" onclick="togglePlay()" id="fp-b-play-btn"><i class="fas fa-play"></i></button>
+          <button class="fp-b-ctrl-btn" onclick="playerPrev()"><i class="fas fa-backward-step"></i></button>
+          <button class="fp-b-ctrl-btn" onclick="downloadCurrentSurah()"><i class="fas fa-download"></i></button>
+        </div>
+        <div class="fp-b-ayahs-label"><i class="fas fa-chevron-up"></i> اسحب للأعلى للقراءة</div>
+      </div>
+      <div class="fp-b-ayahs-list" id="fp-b-ayahs-list"></div>
+    </div>
+
+  </div>
+
+  <!-- ===== AYAH OPTIONS MODAL ===== -->
+  <div id="ayah-modal" class="modal" style="display:none;">
+    <div class="modal-overlay" onclick="closeAyahModal()"></div>
+    <div class="modal-content ayah-modal-content">
+      <div class="modal-header">
+        <h3 id="ayah-modal-title">خيارات الآية</h3>
+        <button class="modal-close" onclick="closeAyahModal()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="ayah-modal-options">
+        <button class="ayah-option-btn" onclick="listenToAyah()">
+          <i class="fas fa-headphones"></i>
+          <span>استمع للآية - السديس</span>
+        </button>
+        <button class="ayah-option-btn" onclick="showAyahTafsir()">
+          <i class="fas fa-book-open"></i>
+          <span>تفسير الآية</span>
+        </button>
+        <button class="ayah-option-btn" onclick="shareAyah()">
+          <i class="fas fa-share-alt"></i>
+          <span>مشاركة الآية</span>
+        </button>
+        <button class="ayah-option-btn" onclick="copyAyah()">
+          <i class="fas fa-copy"></i>
+          <span>نسخ الآية</span>
+        </button>
+      </div>
+      <div id="ayah-tafsir-container" class="ayah-tafsir-container" style="display:none;"></div>
+      <div id="ayah-audio-player" class="ayah-audio-mini" style="display:none;">
+        <audio id="ayah-audio" controls style="width:100%;"></audio>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== ACHIEVEMENTS MODAL ===== -->
+  <div id="achievements-modal" class="modal" style="display:none;">
+    <div class="modal-overlay" onclick="closeAchievements()"></div>
+    <div class="modal-content achievements-modal-content">
+      <div class="modal-header">
+        <h3>إنجازاتك</h3>
+        <button class="modal-close" onclick="closeAchievements()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="achievements-stats">
+        <div class="ach-stat">
+          <div class="ach-stat-num" id="ach-hasanat">0</div>
+          <div class="ach-stat-label">حسنة</div>
+        </div>
+        <div class="ach-stat">
+          <div class="ach-stat-num" id="ach-letters">0</div>
+          <div class="ach-stat-label">حرف</div>
+        </div>
+      </div>
+      <p class="hasanat-info">الحسنة بعشر أمثالها <span>❤️</span></p>
+      <div id="achievements-badges-list" class="achievements-badges-list"></div>
+    </div>
+  </div>
+
+  <!-- ===== TOAST NOTIFICATION ===== -->
+  <div id="toast" class="toast" style="display:none;"></div>
+
+  <!-- ===== HIDDEN AUDIO ELEMENT ===== -->
+  <audio id="main-audio" preload="metadata"></audio>
+
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/quran.js"></script>
+  <script src="js/player.js"></script>
+  <script src="js/prayer.js"></script>
+  <script src="js/azkar.js"></script>
+  <script src="js/progress.js"></script>
+</body>
+
+</html>
